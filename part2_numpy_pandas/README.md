@@ -31,8 +31,9 @@ jupyter lab
 ```
 
 Select the `.venv` Python kernel, then run the notebook cells from top to
-bottom. The notebook searches the current directory and its parents for the
-three CSV files.
+bottom. Keep `GBvideos.csv`, `INvideos.csv`, `USvideos.csv`, and
+`categories.csv` in `part2_numpy_pandas/data/`. The notebook locates that
+folder when launched from the repository root or the Part 2 directory.
 
 ## Engagement score
 

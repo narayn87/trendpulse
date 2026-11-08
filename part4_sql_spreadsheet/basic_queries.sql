@@ -54,3 +54,48 @@ JOIN videos AS v
 GROUP BY v.channel_title
 HAVING COUNT(DISTINCT tr.video_id) >= 5
 ORDER BY distinct_trending_videos DESC, channel;
+
+-- INNER JOIN: show trending records with their required video and category data.
+-- This returns only records that match a video and category, which is the
+-- correct choice when the result must include all three entities.
+SELECT
+    tr.record_id AS record_id,
+    tr.country AS country_code,
+    tr.trending_date AS trending_date,
+    v.title AS video_title,
+    c.category_name AS category,
+    tr.views AS view_count
+FROM trending_records AS tr
+INNER JOIN videos AS v
+    ON v.video_id = tr.video_id
+INNER JOIN categories AS c
+    ON c.category_id = v.category_id
+ORDER BY tr.views DESC
+LIMIT 20;
+
+-- LEFT JOIN: find categories that have no video in the prepared video table.
+-- Starting from all categories preserves unused categories; an INNER JOIN
+-- would discard them and could not answer this question.
+SELECT
+    c.category_id AS category_id,
+    c.category_name AS category
+FROM categories AS c
+LEFT JOIN videos AS v
+    ON v.category_id = c.category_id
+WHERE v.video_id IS NULL
+ORDER BY c.category_id;
+
+-- RIGHT JOIN: audit that every trending record has matching video metadata.
+-- The RIGHT JOIN preserves every trending record, including any orphaned row;
+-- an INNER JOIN would hide those rows. The expected result is empty because
+-- the schema's foreign key requires every record to reference a video.
+SELECT
+    tr.record_id AS record_id,
+    tr.video_id AS video_id,
+    tr.country AS country_code,
+    tr.trending_date AS trending_date
+FROM videos AS v
+RIGHT JOIN trending_records AS tr
+    ON v.video_id = tr.video_id
+WHERE v.video_id IS NULL
+ORDER BY tr.country, tr.trending_date, tr.record_id;

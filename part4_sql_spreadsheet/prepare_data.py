@@ -69,6 +69,19 @@ def main() -> None:
         .sort_values("video_id")
         .reset_index(drop=True)
     )
+    videos["publish_time"] = (
+        pd.to_datetime(videos["publish_time"], utc=True, errors="raise")
+        .dt.tz_localize(None)
+        .dt.strftime("%Y-%m-%d %H:%M:%S")
+    )
+    boolean_columns = [
+        "comments_disabled",
+        "ratings_disabled",
+        "video_error_or_removed",
+    ]
+    for column in boolean_columns:
+        videos[column] = videos[column].astype("int8")
+
     trending_records = (
         trending_records.loc[:, TRENDING_COLUMNS]
         .sort_values(["country", "trending_date", "video_id"])

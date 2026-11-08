@@ -33,8 +33,28 @@ records. The script can be rerun to regenerate them from the raw CSVs.
 ## MySQL schema
 
 Run [`schema.sql`](./schema.sql) in MySQL Workbench to create the
-`trendpulse_analytics` database and its related tables. Import the prepared
-CSVs in foreign-key order: `categories_clean.csv` into `categories`,
-`videos.csv` into `videos`, and `trending_records.csv` into `trending_records`.
-The columns are aligned with the schema; `record_id` is auto-generated when
-importing trending records.
+`trendpulse_analytics` database, tables, load the prepared CSVs, and run
+`SELECT COUNT(*)` for each table. The `LOAD DATA LOCAL INFILE` paths in the
+script match this checkout; update the repository path if needed. If MySQL
+rejects local file loading, enable `LOCAL INFILE` in the MySQL server and
+Workbench connection settings, or import each CSV with Workbench's Table Data
+Import Wizard in this order: `categories_clean.csv` → `categories`, `videos.csv`
+→ `videos`, and `trending_records.csv` → `trending_records`.
+
+The loader maps empty likes and comment counts to SQL `NULL`; it accepts
+boolean values as either `True`/`False` or `0`/`1`, and converts UTC publish
+timestamps into MySQL `DATETIME`.
+The SQL file's count queries should return **17 categories**, **14,688 videos**,
+and **45,908 trending records** after loading. Run the file against an empty
+schema (or clear existing rows first) to avoid primary-key or unique-key
+conflicts on repeat imports.
+
+## Basic queries
+
+Run [`basic_queries.sql`](./basic_queries.sql) in MySQL Workbench after loading
+the tables. It demonstrates `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, `DISTINCT`,
+column aliases, joins, `GROUP BY`, aggregate functions, and `HAVING`. The first
+query returns the top 10 most-viewed GB trending records; the second lists
+distinct country/category pairs. The grouped queries return categories whose
+average views exceed 1,000,000 and channels with at least five distinct
+trending videos.
